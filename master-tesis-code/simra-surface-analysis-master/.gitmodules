@@ -1,0 +1,3 @@
+[submodule "src/simrakit"]
+	path = src/simrakit
+	url = https://github.com/lennet/SimRaKit.git

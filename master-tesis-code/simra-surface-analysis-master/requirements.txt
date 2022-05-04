@@ -1,0 +1,6 @@
+scipy
+sklearn
+fire
+calibraxis
+joblib
+osmium

@@ -1,0 +1,9 @@
+gitpython
+geopandas
+geopy
+pandas
+matplotlib
+scipy
+ipyleaflet
+osmium
+shapely
