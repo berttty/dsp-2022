@@ -2,13 +2,30 @@ goals:
 in the end: predict the quality surface with ML
 machine learning model can be very promising (but we have to see if it will be successful)
 
+important:
+compare approaches in the end
+- explain why we used specific steps
+
+
+need:
+reference for the area --> record a ride yourself (smooth or not?) (smooth / rough and "middle")
++5 example rides and compare it to simra rides
+(Ernst Reuter - Brandenburger Tor - Alexanderplatz)
+then extrapolate sections according to it
+(dont upload the rides) - (ios:  (android: in settings - bottom export - simra.zip)
+
 
 thoughts:
+
+general:
+- incident data not important
+
 ml approach (clean the data / noise):
 - because we have to predict the quality surface, we should be careful if we overfit the model because we "only use Berlin"
 - same road / same path ==> different rides can have different outcomes !
 - weekend more rides than in weekdays
 - need the lockdown data for berlin
+- k nearest neighbor
 
 
 general difficulties:
@@ -17,6 +34,9 @@ with the rides:
 - numbers fluctuade --> small loyal userbase
 - corona (less rides)
 - people forget to turn on the app
+- we dont know (because GPS inaccuracy) if ride was on road or sidewalk
+- labels are not accurate
+- left turn behaviour of rides
 
 
 with openstreetmap:
