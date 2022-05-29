@@ -1,1 +1,7 @@
-# THIS FOLDER IS FOR THE CODE
+# Instalation of RAMU
+
+The instalation of ramu required the following elements.
+
+- Miniconda
+- Docker 
+
