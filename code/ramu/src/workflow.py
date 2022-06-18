@@ -1,12 +1,13 @@
 from typing import Mapping
 
-from ramu.phase import Phase
-
-from ramu.phases.grid_generation import GridGeneration
+from phase import Phase
+from phases.grid_generation import GridGeneration
 
 
 class Workflow:
-
+    """
+    Workflow create the workflow to execute and prepare the phase required to be executed
+    """
     start_name: str
     start: Phase
 
