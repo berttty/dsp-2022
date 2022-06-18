@@ -1,5 +1,6 @@
 from typing import Mapping
 
+from context import RamuContext
 from phase import Phase
 from phases.grid_generation import GridGeneration
 
@@ -28,7 +29,7 @@ class Workflow:
         self.end_name = end_name.lower()
         self.source_path = source_path
         self.step_paths = {}
-        self.addCheckpoint(self.end_name, sink_path)
+       # self.addCheckpoint(self.end_name, sink_path)
 
     def addCheckpoint(self, phase_name: str, path: str):
         self.step_paths.update(phase_name, path)
@@ -36,8 +37,12 @@ class Workflow:
     def run(self):
         activate: bool = False
         current: Phase = None
+        context: RamuContext = RamuContext()
 
         if self.start_name == "gridgeneration" or activate:
             activate = True
-            source =
             current = GridGeneration()
+            current.sink_path = "grid_generation"
+            current.source = context.getSparkContext().parallelize(['berlin'])
+            current.execute()
+

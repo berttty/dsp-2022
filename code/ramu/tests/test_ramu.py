@@ -5,7 +5,6 @@
 import pytest
 
 
-from ramu import ramu
 
 
 @pytest.fixture

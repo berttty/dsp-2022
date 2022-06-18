@@ -2,6 +2,8 @@
 import argparse
 import sys
 
+from workflow import Workflow
+
 
 def main():
     """Console script for ramu."""
@@ -16,4 +18,5 @@ def main():
 
 
 if __name__ == "__main__":
+    Workflow('gridgeneration', '', None, None).run()
     sys.exit(main())  # pragma: no cover

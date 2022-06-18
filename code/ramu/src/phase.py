@@ -1,13 +1,10 @@
-import pyspark as pyspark
 from pyspark import RDD
 
 from context import RamuContext
 from typing import (Callable, TypeVar)
 
-sc = pyspark.SparkContext('local[*]')
-
-Input = TypeVar("I")
-Output = TypeVar("O")
+In = TypeVar("In")
+Out = TypeVar("Out")
 
 
 class Phase:
@@ -15,12 +12,12 @@ class Phase:
     Phase is the structure that encapsulate one step inside of the workflow, but also allows
     """
     source_path: str
-    source: RDD[Input]
+    source: RDD[In]
 
     sink_path: str
-    sink: RDD[Output]
+    sink: RDD[Out]
 
-    def inputFormatter(self) -> Callable[[str], Input]:
+    def inputFormatter(self) -> Callable[[str], In]:
         """
         inputFormatter provide a method to convert the text to the type that could be process
         by the Phase
@@ -30,7 +27,7 @@ class Phase:
         """
         return None
 
-    def outputFormatter(self) -> Callable[[Output], str]:
+    def outputFormatter(self) -> Callable[[Out], str]:
         """
         outputFormatter provide a method to convert content of RDD into text file
 
@@ -39,7 +36,7 @@ class Phase:
         """
         return None
 
-    def getRDDSource(self) -> RDD[Input]:
+    def getRDDSource(self) -> RDD[In]:
         """
         get or create the source for the Phase
 
@@ -65,14 +62,14 @@ class Phase:
         return sc.textFile(self.source_path) \
                  .map(converter)
 
-    def run(self, rdd: RDD[Input]) -> RDD[Output]:
+    def run(self, rdd: RDD[In]) -> RDD[Out]:
         """
         run is the method that contains the logic of the phase
         :param rdd: the rdd that will use as source
         :return: return the rdd after the elements converted
         """
 
-    def store(self, rdd: RDD[Output]):
+    def store(self, rdd: RDD[Out]):
         """
         store create a file and save the information using the methods
         :param rdd: it take the
@@ -94,7 +91,7 @@ class Phase:
         rdd.map(converter)\
            .saveAsTextFile(self.sink_path)
 
-    def sink(self) -> RDD[Output]:
+    def sink(self) -> RDD[Out]:
         """
         obtain the sink of the phase this could be use by other phase
         :return: return the sink of the current phase
@@ -107,10 +104,11 @@ class Phase:
         :return:
         """
         rdd = self.getRDDSource()
-        processed = self.run(rdd)
+        processed: RDD[Out] = self.run(rdd)
         if self.sink_path is None:
             self.sink = processed
             return
 
+        print(processed)
         self.sink = processed.cache()
         self.store(self.sink)
