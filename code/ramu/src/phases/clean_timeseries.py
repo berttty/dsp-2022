@@ -1,8 +1,11 @@
-from ramu.phase import Phase
+from typing import Callable
+
+from pyspark import RDD
+from phase import Phase, In, Out
 
 class CleanTimeSeries(Phase):
 
-    def inputFormatter(self) -> Callable[[str], I]:
+    def inputFormatter(self) -> Callable[[str], In]:
         """
         inputFormatter provide a method to convert the text to the type that could be process
         by the Phase
@@ -12,7 +15,7 @@ class CleanTimeSeries(Phase):
         """
         return None
 
-    def outputFormatter(self) -> Callable[[O], str]:
+    def outputFormatter(self) -> Callable[[Out], str]:
         """
         outputFormatter provide a method to convert content of RDD into text file
 
@@ -21,7 +24,7 @@ class CleanTimeSeries(Phase):
         """
         return None
 
-    def run(self, rdd: RDD[I]) -> RDD[O]:
+    def run(self, rdd: RDD[In]) -> RDD[Out]:
         """
         run is the method that contains the logic of the phase
         :param rdd: the rdd that will use as source
