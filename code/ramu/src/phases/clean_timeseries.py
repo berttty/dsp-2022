@@ -26,7 +26,11 @@ class CleanTimeSeries(Phase):
         """
 
         def convert(pd) -> str:
-            return str(pd.to_json(orient='records'))
+            try:
+                return str(pd.to_json(orient='records'))
+            except Exception as ex:
+                print(pd)
+                raise Exception(ex)
 
         return convert
 

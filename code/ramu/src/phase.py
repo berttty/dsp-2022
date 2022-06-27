@@ -111,5 +111,6 @@ class Phase:
             return
 
         print(processed)
-        self.sink = processed.cache()
+        #TODO: validate if the cache is need it
+        self.sink = processed#.cache()
         self.store(self.sink)

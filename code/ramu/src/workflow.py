@@ -73,27 +73,31 @@ class Workflow:
 
         if self.start_name == 'clean' or activate:
             activate = True
+            previous = current
             current = CleanTimeSeries()
             current.context = context
-            current.sink_path = 'clean_time_series'
+           # current.sink_path = 'clean_time_series'
+            current.sink_path = None
             # TODO change the repartion for a configuration varaible
-            current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(1)
+            current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(120)
             current.execute()
 
-        if self.end_name == 'gridgeneration':
+        if self.end_name == 'clean':
             activate = False
 
         if self.start_name == 'tile_generation' or activate:
             activate = True
+            previous = current
             current = TileGeneration()
             current.context = context
             current.sink_path = 'tile_generation'
-            current.source_path = self.source_path
-            # TODO change the repartion for a configuration varaible
-            if current.source_path == None:
-                current.source = previous.sink
-            else:
+            if previous is None:
+                current.source_path = self.source_path
                 current.source = None
+            else:
+                current.source = previous.sink
+                current.source_path = None
+
             current.execute()
 
         if self.end_name == 'tile_generation':
