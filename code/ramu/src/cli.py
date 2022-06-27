@@ -18,9 +18,10 @@ def main():
 
 
 if __name__ == "__main__":
-   # Workflow('grid_generation', 'grid_generation', None, None).run()
+#    Workflow('grid_generation', 'grid_generation', None, None).run()
    # Workflow('grid_labeling', 'grid_labeling', 'grid_generation', None).run()
 
 #    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*', None).run()
-    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*', None).run()
+#    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*', None).run()
+    Workflow('tile_generation', 'tile_generation', 'clean_time_series', None).run()
     sys.exit(main())  # pragma: no cover

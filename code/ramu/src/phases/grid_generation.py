@@ -54,16 +54,20 @@ def nextpoint(latitude, longitude, direction: str, size: int = 100):
     return point.latitude, point.longitude
 
 
-def get_rules(city:str, size:int = 100):
+def get_rules(city: str, size: int = 100):
     latitude_start = CITY[city]['start']['latitude']
     longitude_start = CITY[city]['start']['longitude']
     latitude_end = CITY[city]['end']['latitude']
     longitude_end = CITY[city]['end']['longitude']
 
-    latitudes = generate_ruler_latitude(latitude_start, longitude_start, longitude_end, size)
-    longitudes = generate_ruler_longitude(longitude_start, latitude_start, latitude_end, size)
+    longitudes = generate_ruler_latitude(latitude_start, longitude_start, longitude_end, size)
+    latitudes = generate_ruler_longitude(longitude_start, latitude_start, latitude_end, size)
 
     return latitudes, longitudes
+
+
+def get_identifier(city: str, index_lat, index_lon, n_lat):
+    return '{}_{}'.format(city, (((n_lat - 1) * (index_lon - 1)) + (index_lat - 1)))
 
 
 def grid(city: str, size: int = 100):
@@ -81,11 +85,11 @@ def grid(city: str, size: int = 100):
     for index_lon in range(1, n_longitudes):
         for index_lat in range(1, n_latitudes):
             yield \
-              '{}_{}'.format(city, (((n_latitudes-1) * (index_lon - 1)) + (index_lat-1))), \
-              latitudes[index_lat - 1], \
-              longitudes[index_lon - 1], \
-              latitudes[index_lat], \
-              longitudes[index_lon]
+                get_identifier(city, index_lat, index_lon, n_latitudes), \
+                latitudes[index_lat - 1], \
+                longitudes[index_lon - 1], \
+                latitudes[index_lat], \
+                longitudes[index_lon]
 
 
 class GridGeneration(Phase):

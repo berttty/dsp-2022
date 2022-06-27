@@ -25,8 +25,8 @@ class CleanTimeSeries(Phase):
         :return: Callable that will be use as the convertor before to store
         """
 
-        def convert(tuple) -> str:
-            return str(tuple)
+        def convert(pd) -> str:
+            return str(pd.to_json(orient='records'))
 
         return convert
 

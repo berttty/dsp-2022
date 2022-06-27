@@ -1,7 +1,11 @@
+import json
 from typing import Callable
 
+import pandas
+from pyarrow._dataset import Dataset
 from pyspark import RDD
 from phase import Phase, In, Out
+
 
 class TileUsageCalculation(Phase):
 
@@ -13,7 +17,12 @@ class TileUsageCalculation(Phase):
         this method need to be implemented
         :return: Callable that will be use by the map function
         """
-        return None
+
+        def input_formatter(line: str) -> Dataset:
+            js = json.loads(line)
+            return pandas.DataFrame.from_records(js)
+
+        return input_formatter
 
     def outputFormatter(self) -> Callable[[Out], str]:
         """
@@ -22,7 +31,12 @@ class TileUsageCalculation(Phase):
         this method need to be implemented
         :return: Callable that will be use as the convertor before to store
         """
-        return None
+
+        def output_formatter(t: tuple) -> str:
+            value = {'key': t[0], 'value': t[1].to_dict('records')}
+            return json.dumps(value)
+
+        return output_formatter
 
     def run(self, rdd: RDD[In]) -> RDD[Out]:
         """
@@ -30,3 +44,4 @@ class TileUsageCalculation(Phase):
         :param rdd: the rdd that will use as source
         :return: return the rdd after the elements converted
         """
+

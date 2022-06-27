@@ -5,6 +5,8 @@ from phase import Phase
 from phases.clean_timeseries import CleanTimeSeries
 from phases.grid_generation import GridGeneration
 from phases.grid_labeling import GridLabeling
+from phases.tile_calculations import TileUsageCalculation
+from phases.tile_generation import TileGeneration
 
 
 class Workflow:
@@ -79,4 +81,20 @@ class Workflow:
             current.execute()
 
         if self.end_name == 'gridgeneration':
+            activate = False
+
+        if self.start_name == 'tile_generation' or activate:
+            activate = True
+            current = TileGeneration()
+            current.context = context
+            current.sink_path = 'tile_generation'
+            current.source_path = self.source_path
+            # TODO change the repartion for a configuration varaible
+            if current.source_path == None:
+                current.source = previous.sink
+            else:
+                current.source = None
+            current.execute()
+
+        if self.end_name == 'tile_generation':
             activate = False
