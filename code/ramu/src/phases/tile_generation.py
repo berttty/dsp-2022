@@ -71,12 +71,6 @@ class TileGeneration(Phase):
             curr_lon = 0
             identifier = None
             start = 0
-            if 'lat' not in pd.columns:
-                print(pd.head)
-                return
-            if 'lon' not in pd.columns:
-                print(pd.head)
-                return
 
             for index, row in pd.iterrows():
                 if curr_lon != row['lon'] or curr_lat != row['lat']:

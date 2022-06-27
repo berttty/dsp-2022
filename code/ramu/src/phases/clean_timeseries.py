@@ -47,6 +47,9 @@ class CleanTimeSeries(Phase):
                 if character == '\n':
                     break
 
-            return pandas.read_csv(io.StringIO(tuple[1][position:]), sep=",").ffill()
+            pd = pandas.read_csv(io.StringIO(tuple[1][position:]), sep=",").ffill()
+            if 'lat' not in pd.columns:
+                pd = pd.rename(columns={'at': 'lat'})
+            return pd
 
         return rdd.map(convert)

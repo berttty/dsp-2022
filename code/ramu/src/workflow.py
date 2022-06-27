@@ -79,7 +79,7 @@ class Workflow:
            # current.sink_path = 'clean_time_series'
             current.sink_path = None
             # TODO change the repartion for a configuration varaible
-            current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(120)
+            current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(12)
             current.execute()
 
         if self.end_name == 'clean':
