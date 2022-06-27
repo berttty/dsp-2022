@@ -16,4 +16,6 @@ class RamuContext:
         """
         # TODO: pointing the context to the cluster configuration or
         #       get the configuration using a file
-        return pyspark.SparkContext('local[*]')
+        conf = pyspark.SparkConf().setMaster('local[*]').set("spark.hadoop.validateOutputSpecs", "false")
+
+        return pyspark.SparkContext(conf=conf)

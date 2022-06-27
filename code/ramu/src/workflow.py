@@ -2,6 +2,7 @@ from typing import Mapping
 
 from context import RamuContext
 from phase import Phase
+from phases.clean_timeseries import CleanTimeSeries
 from phases.grid_generation import GridGeneration
 
 
@@ -44,5 +45,13 @@ class Workflow:
             current = GridGeneration()
             current.sink_path = "grid_generation"
             current.source = context.getSparkContext().parallelize(['berlin'])
+            current.execute()
+
+        if self.start_name == "clean" or activate:
+            activate == True
+            current = CleanTimeSeries()
+            current.sink_path = "clean_time_series"
+            # TODO change the repartion for a configuration varaible
+            current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(1)
             current.execute()
 

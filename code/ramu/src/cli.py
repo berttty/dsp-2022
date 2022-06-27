@@ -18,5 +18,7 @@ def main():
 
 
 if __name__ == "__main__":
-    Workflow('gridgeneration', '', None, None).run()
+  #  Workflow('gridgeneration', '', None, None).run()
+#    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*', None).run()
+    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*', None).run()
     sys.exit(main())  # pragma: no cover
