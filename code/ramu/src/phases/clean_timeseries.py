@@ -43,6 +43,6 @@ class CleanTimeSeries(Phase):
                 if character == '\n':
                     break
 
-            return pandas.read_csv(io.StringIO(tuple[1][position:]), sep=",")
+            return pandas.read_csv(io.StringIO(tuple[1][position:]), sep=",").ffill()
 
         return rdd.map(convert)
