@@ -17,10 +17,10 @@ class GridLabeling(Phase):
         """
         def convert(line) -> tuple[float, float, float, float]:
             position = line.split(" ")
-            if len(position) != 4:
+            if len(position) != 5:
                 raise Exception("The number of elements is not valid")
 
-            return float(position[0]), float(position[1]), float(position[2]), float(position[3])
+            return position[0], float(position[1]), float(position[2]), float(position[3]), float(position[4])
 
         return convert
 
@@ -32,7 +32,7 @@ class GridLabeling(Phase):
         :return: Callable that will be use as the convertor before to store
         """
         def convert(tuple) -> str:
-            return "{} {} {} {} {}".format(tuple[0], tuple[1], tuple[2], tuple[3], tuple[4])
+            return "{} {} {} {} {} {}".format(tuple[0], tuple[1], tuple[2], tuple[3], tuple[4], tuple[5])
 
         return convert
 
@@ -44,7 +44,7 @@ class GridLabeling(Phase):
         """
         def get_label(tuple):
             label = randint(0, 100)
-            return tuple[0], tuple[1], tuple[2], tuple[3], label
+            return tuple[0], tuple[1], tuple[2], tuple[3], tuple[4], label
 
         return rdd.map(get_label)
 
