@@ -18,7 +18,9 @@ def main():
 
 
 if __name__ == "__main__":
-  #  Workflow('gridgeneration', '', None, None).run()
+  #  Workflow('grid_generation', 'grid_generation', None, None).run()
+    Workflow('grid_labeling', 'grid_labeling', 'file:///Users/bertty/databloom/dsp-2022/code/ramu/src/grid_generation', None).run()
+
 #    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*', None).run()
-    Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*', None).run()
+  #  Workflow('clean', '', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*', None).run()
     sys.exit(main())  # pragma: no cover

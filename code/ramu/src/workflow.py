@@ -4,6 +4,7 @@ from context import RamuContext
 from phase import Phase
 from phases.clean_timeseries import CleanTimeSeries
 from phases.grid_generation import GridGeneration
+from phases.grid_labeling import GridLabeling
 
 
 class Workflow:
@@ -40,18 +41,42 @@ class Workflow:
         current: Phase = None
         context: RamuContext = RamuContext()
 
-        if self.start_name == "gridgeneration" or activate:
+        if self.start_name == 'grid_generation' or activate:
             activate = True
             current = GridGeneration()
-            current.sink_path = "grid_generation"
+            current.context = context
+            current.sink_path = 'grid_generation'
             current.source = context.getSparkContext().parallelize(['berlin'])
             current.execute()
 
-        if self.start_name == "clean" or activate:
-            activate == True
+        if self.end_name == 'grid_generation':
+            activate = False
+
+        if self.start_name == 'grid_labeling' or activate:
+            activate = True
+            previous = current
+            current = GridLabeling()
+            current.context = context
+            current.source_path = self.source_path
+            current.sink_path = 'grid_labeling'
+            if current.source_path == None:
+                current.source = previous.sink
+            else:
+                current.source = None
+            current.execute()
+
+        if self.end_name == 'grid_labeling':
+            activate = False
+
+
+        if self.start_name == 'clean' or activate:
+            activate = True
             current = CleanTimeSeries()
-            current.sink_path = "clean_time_series"
+            current.context = context
+            current.sink_path = 'clean_time_series'
             # TODO change the repartion for a configuration varaible
             current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(1)
             current.execute()
 
+        if self.end_name == 'gridgeneration':
+            activate = False

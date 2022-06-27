@@ -11,6 +11,7 @@ class Phase:
     """
     Phase is the structure that encapsulate one step inside of the workflow, but also allows
     """
+    context: RamuContext
     source_path: str
     source: RDD[In]
 
@@ -58,7 +59,7 @@ class Phase:
                 )
             )
 
-        sc = RamuContext.instance().getSparkContext()
+        sc = self.context.getSparkContext()
         return sc.textFile(self.source_path) \
                  .map(converter)
 
