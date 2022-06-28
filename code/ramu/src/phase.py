@@ -96,7 +96,7 @@ class Phase:
         rdd.map(converter)\
            .saveAsTextFile(self.sink_path)
 
-    def sink(self) -> RDD[Out]:
+    def get_sink(self) -> RDD[Out]:
         """
         obtain the sink of the phase this could be use by other phase
         :return: return the sink of the current phase

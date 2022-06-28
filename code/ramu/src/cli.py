@@ -25,8 +25,8 @@ if __name__ == "__main__":
     logging.info('Started')
 
 
-    Workflow('grid_generation', 'grid_generation', None, None).run()
-    #Workflow('grid_labeling', 'grid_labeling', None, None).run()
+  #  Workflow('grid_generation', 'grid_generation', None, None).run()
+    Workflow('grid_labeling', 'grid_labeling', None, None).run()
    # Workflow('grid_labeling', 'grid_labeling', 'grid_generation', None).run()
 
 #    Workflow('clean', 'tile_generation', 'file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*', None).run()
