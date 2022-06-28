@@ -1,3 +1,6 @@
+import json
+
+import jq
 import pyspark
 
 from singleton import singleton
@@ -9,6 +12,15 @@ class RamuContext:
     It is change to have the context of the execution
     """
     sc = None
+    configuration_json = None
+
+    def __init__(self, conf_file_path: str = 'configuration.json'):
+        # read file
+        with open(conf_file_path, 'r') as myfile:
+            data = myfile.read()
+
+        self.configuration_json = json.loads(data)
+
 
     def getSparkContext(self):
         """
@@ -22,3 +34,8 @@ class RamuContext:
             self.sc = pyspark.SparkContext(conf=conf)
 
         return self.sc
+
+    def get(self, query: str):
+        return jq.compile(query).input(self.configuration_json).first()
+
+

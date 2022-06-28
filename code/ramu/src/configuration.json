@@ -1,0 +1,29 @@
+{
+    "variables": {
+        "": ""
+    },
+    "stages": {
+        "grid_generation": {
+            "conf": {
+                "repartition": 12
+            },
+            "inputs": [
+                {
+                    "list": ["berlin"]
+                }
+            ],
+            "outputs": [
+                {
+                    "path": "output_grid_generation"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "",
+                    "executed": true,
+                    "location": ""
+                }
+            ]
+        }
+    }
+}
