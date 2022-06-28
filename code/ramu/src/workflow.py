@@ -1,12 +1,13 @@
-from typing import Mapping
+from typing import Mapping, Callable
 
 from context import RamuContext
 from phase import Phase
 from phases.clean_timeseries import CleanTimeSeries
-from phases.grid_generation import GridGeneration
+from phases.grid_generation import grid_generation_factory
 from phases.grid_labeling import GridLabeling
 from phases.tile_calculations import TileUsageCalculation
 from phases.tile_generation import TileGeneration
+from phases.tile_groupby import TileGroupBy
 
 
 class Workflow:
@@ -22,6 +23,8 @@ class Workflow:
     source_path: str
     step_paths: Mapping[str, str]
 
+    stages: Mapping[str, Callable]
+
     def __init__(self, start_name: str, end_name: str, source_path: str, sink_path: str):
         """
         default constructor
@@ -35,24 +38,21 @@ class Workflow:
         self.step_paths = {}
        # self.addCheckpoint(self.end_name, sink_path)
 
-    def addCheckpoint(self, phase_name: str, path: str):
+    def add_checkpoint(self, phase_name: str, path: str):
         self.step_paths.update(phase_name, path)
+
+    def generate_stages(self):
+        self.stages['grid_generation'] = grid_generation_factory
+
+
+
 
     def run(self):
         activate: bool = False
         current: Phase = None
         context: RamuContext = RamuContext()
+        stages = {}
 
-        if self.start_name == 'grid_generation' or activate:
-            activate = True
-            current = GridGeneration()
-            current.context = context
-            current.sink_path = 'grid_generation'
-            current.source = context.getSparkContext().parallelize(['berlin'])
-            current.execute()
-
-        if self.end_name == 'grid_generation':
-            activate = False
 
         if self.start_name == 'grid_labeling' or activate:
             activate = True
@@ -66,6 +66,7 @@ class Workflow:
             else:
                 current.source = None
             current.execute()
+            stages['grid_labeling'] = current
 
         if self.end_name == 'grid_labeling':
             activate = False
@@ -81,6 +82,7 @@ class Workflow:
             # TODO change the repartion for a configuration varaible
             current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(12)
             current.execute()
+            stages['clean'] = current
 
         if self.end_name == 'clean':
             activate = False
@@ -97,8 +99,8 @@ class Workflow:
             else:
                 current.source = previous.sink
                 current.source_path = None
-
             current.execute()
+            stages['tile_generation'] = current
 
         if self.end_name == 'tile_generation':
             activate = False
@@ -115,8 +117,26 @@ class Workflow:
             else:
                 current.source = previous.sink
                 current.source_path = None
-
             current.execute()
+            stages['tile_usage_calculation'] = current
 
         if self.end_name == 'tile_usage_calculation':
+            activate = False
+
+        if self.start_name == 'tile_groupby' or activate:
+            activate = True
+            previous = current
+            current = TileGroupBy()
+            current.context = context
+            current.sink_path = 'tile_groupby'
+            if previous is None:
+                current.source_path = self.source_path
+                current.source = None
+            else:
+                current.source = previous.sink
+                current.source_path = None
+            current.execute()
+            stages['tile_groupby'] = current
+
+        if self.end_name == 'tile_groupby':
             activate = False
