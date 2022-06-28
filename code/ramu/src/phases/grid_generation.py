@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import Callable, Dict
 
@@ -140,8 +141,11 @@ class GridGeneration(Phase):
 
 
 def grid_generation_factory(context: RamuContext, stages: Dict[str, Phase]) -> Phase:
+    logging.info("Start factory of GridGeneration")
     current = GridGeneration()
+    current.name = 'grid_generation'
     current.context = context
     current.sink_path = context.get('.stages.grid_generation.outputs[0].path')
-    current.source = context.getSparkContext().parallelize(context.get('.stages.grid_generation.inputs[0].list'))
+    current.source = context.get_spark().parallelize(context.get('.stages.grid_generation.inputs[0].list'))
+    logging.info("End factory of GridGeneration")
     return current
