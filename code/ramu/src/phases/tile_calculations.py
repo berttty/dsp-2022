@@ -1,10 +1,12 @@
 import json
+import logging
 import math
-from typing import Callable
+from typing import Callable, Dict
 
 import pandas
-from pyarrow._dataset import Dataset
 from pyspark import RDD
+
+from context import RamuContext
 from phase import Phase, In, Out
 
 
@@ -18,7 +20,6 @@ class TileUsageCalculation(Phase):
         this method need to be implemented
         :return: Callable that will be use by the map function
         """
-
         def input_formatter(line: str) -> tuple:
             js = json.loads(line)
             return js['key'], pandas.DataFrame.from_records(js['value'])
@@ -32,13 +33,12 @@ class TileUsageCalculation(Phase):
         this method need to be implemented
         :return: Callable that will be use as the convertor before to store
         """
-
         def output_formatter(t: tuple) -> str:
-            #value = {'key': t[0], 'value': t[1].to_dict('records')}
-            l = []
+            # value = {'key': t[0], 'value': t[1].to_dict('records')}
+            li = []
             for x in t[1]:
-                l.append(x.to_dict('records'))
-            value = {'key': t[0], 'value': l}
+                li.append(x.to_dict('records'))
+            value = {'key': t[0], 'value': li}
             return json.dumps(value)
 
         return output_formatter
@@ -50,6 +50,8 @@ class TileUsageCalculation(Phase):
         :return: return the rdd after the elements converted
         """
 
+        reduction: float = self.context.get('.stages.tile_usage_calculation.conf.reduction')
+
         def extract_key(element):
             return len(element)
 
@@ -58,9 +60,38 @@ class TileUsageCalculation(Phase):
             size: int = len(elements)
             if size < 3:
                 return elements
-            #TODO: retrieve reduction from configuration file
-            reduction: float = 0.10
             cut: int = math.ceil(size * reduction)
             return sorted(elements, key=extract_key)[cut:-cut]
 
         return rdd.groupByKey().mapValues(calculate_usage)
+
+
+def tile_usage_calculation_factory(context: RamuContext, stages: Dict[str, Phase]) -> Phase:
+    logging.info('Start factory of TileUsageCalculation')
+    current = TileUsageCalculation()
+    current.name = 'tile_usage_calculation'
+    current.context = context
+    current.sink_path = context.get('.stages.tile_usage_calculation.outputs[0]')
+    previous = stages[context.get('.stages.tile_usage_calculation.previous[0].name')]
+    if previous is None:
+        file_path = context.get('.stages.tile_usage_calculation.inputs[0]')
+        logging.info('The stage "%s" will use the file "%s" as source', current.name, file_path)
+        current.source_path = file_path
+    else:
+        if previous.get_sink() is None:
+            logging.info(
+                'The stage "%s" will use the file "%s" as source coming from the stage "%s"',
+                current.name,
+                previous.sink_path,
+                previous.name
+            )
+            current.source_path = previous.sink_path
+        else:
+            logging.info(
+                'The stage "%s" will use the output from the stage "%s" directly',
+                current.name,
+                previous.name
+            )
+            current.source = previous.get_sink()
+    logging.info('End factory of TileUsageCalculation')
+    return current

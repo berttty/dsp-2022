@@ -5,8 +5,8 @@ from phase import Phase
 from phases.clean_timeseries import clean_timeseries_factory
 from phases.grid_generation import grid_generation_factory
 from phases.grid_labeling import grid_labeling_factory
-from phases.tile_calculations import TileUsageCalculation
-from phases.tile_generation import TileGeneration, tile_generation_factory
+from phases.tile_calculations import tile_usage_calculation_factory
+from phases.tile_generation import tile_generation_factory
 from phases.tile_groupby import TileGroupBy
 
 
@@ -48,11 +48,18 @@ class Workflow:
         self.stages['grid_labeling'] = grid_labeling_factory
         self.stages['clean_timeseries'] = clean_timeseries_factory
         self.stages['tile_generation'] = tile_generation_factory
+        self.stages['tile_usage_calculation'] = tile_usage_calculation_factory
 
     def run(self):
         context: RamuContext = RamuContext()
         stages = {}
-        order_stages = ['grid_generation', 'grid_labeling', 'clean_timeseries', 'tile_generation']
+        order_stages = [
+            'grid_generation',
+            'grid_labeling',
+            'clean_timeseries',
+            'tile_generation',
+            'tile_usage_calculation'
+        ]
 
         for st in order_stages:
             stages[st] = self.stages[st](context, stages)
@@ -60,42 +67,6 @@ class Workflow:
         stages[self.start_name].execute()
 
 
-        #
-        # if self.start_name == 'tile_generation' or activate:
-        #     activate = True
-        #     previous = current
-        #     current = TileGeneration()
-        #     current.context = context
-        #     current.sink_path = 'tile_generation'
-        #     if previous is None:
-        #         current.source_path = self.source_path
-        #         current.source = None
-        #     else:
-        #         current.source = previous.sink
-        #         current.source_path = None
-        #     current.execute()
-        #     stages['tile_generation'] = current
-        #
-        # if self.end_name == 'tile_generation':
-        #     activate = False
-        #
-        # if self.start_name == 'tile_usage_calculation' or activate:
-        #     activate = True
-        #     previous = current
-        #     current = TileUsageCalculation()
-        #     current.context = context
-        #     current.sink_path = 'tile_usage_calculation'
-        #     if previous is None:
-        #         current.source_path = self.source_path
-        #         current.source = None
-        #     else:
-        #         current.source = previous.sink
-        #         current.source_path = None
-        #     current.execute()
-        #     stages['tile_usage_calculation'] = current
-        #
-        # if self.end_name == 'tile_usage_calculation':
-        #     activate = False
         #
         # if self.start_name == 'tile_groupby' or activate:
         #     activate = True

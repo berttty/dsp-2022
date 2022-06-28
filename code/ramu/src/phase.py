@@ -108,6 +108,7 @@ class Phase:
         execute the pipeline of the current phase
         :return:
         """
+        logging.info("the stage '%s' is Executing", self.name)
         rdd = self.getRDDSource()
         processed: RDD[Out] = self.run(rdd)
         if self.sink_path is None:

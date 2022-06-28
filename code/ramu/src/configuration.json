@@ -90,6 +90,29 @@
                     "name": "clean_timeseries"
                 }
             ]
+        },
+        "tile_usage_calculation": {
+            "conf": {
+                "repartition": 12,
+                "reduction": 0.10
+            },
+            "inputs": [
+                {
+                    "value": "output_tile_generation",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_usage_calculation",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "tile_generation"
+                }
+            ]
         }
     }
 }

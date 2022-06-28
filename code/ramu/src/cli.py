@@ -35,7 +35,7 @@ if __name__ == "__main__":
 #    Workflow('tile_usage_calculation', 'tile_usage_calculation', 'tile_generation', None).run()
 #    Workflow('tile_groupby', 'tile_groupby', 'tile_usage_calculation', None).run()
 
-    Workflow('grid_generation', 'grid_generation', None, None).run()
+    Workflow('tile_usage_calculation', 'tile_usage_calculation', None, None).run()
 
   #  print(RamuContext().get('.stages.grid_generation.inputs[0]'))
 
