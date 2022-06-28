@@ -51,6 +51,22 @@
                     "name": "grid_generation"
                 }
             ]
+        },
+        "clean_timeseries": {
+            "conf": {
+                "repartition": 12
+            },
+            "inputs": [
+                {
+                    "path": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*"
+                }
+            ],
+            "outputs": [
+                {
+                    "path": "output_clean_timeseries"
+                }
+            ],
+            "previous": []
         }
     }
 }

@@ -2,7 +2,7 @@ from typing import Mapping, Callable
 
 from context import RamuContext
 from phase import Phase
-from phases.clean_timeseries import CleanTimeSeries
+from phases.clean_timeseries import clean_timeseries_factory
 from phases.grid_generation import grid_generation_factory
 from phases.grid_labeling import grid_labeling_factory
 from phases.tile_calculations import TileUsageCalculation
@@ -46,11 +46,12 @@ class Workflow:
     def generate_stages(self):
         self.stages['grid_generation'] = grid_generation_factory
         self.stages['grid_labeling'] = grid_labeling_factory
+        self.stages['clean_timeseries'] = clean_timeseries_factory
 
     def run(self):
         context: RamuContext = RamuContext()
         stages = {}
-        order_stages = ['grid_generation', 'grid_labeling']
+        order_stages = ['grid_generation', 'grid_labeling', 'clean_timeseries']
 
         for st in order_stages:
             stages[st] = self.stages[st](context, stages)
@@ -58,21 +59,6 @@ class Workflow:
         stages[self.start_name].execute()
 
 
-
-        # if self.start_name == 'clean' or activate:
-        #     activate = True
-        #     previous = current
-        #     current = CleanTimeSeries()
-        #     current.context = context
-        #    # current.sink_path = 'clean_time_series'
-        #     current.sink_path = None
-        #     # TODO change the repartion for a configuration varaible
-        #     current.source = context.getSparkContext().wholeTextFiles(self.source_path).repartition(12)
-        #     current.execute()
-        #     stages['clean'] = current
-        #
-        # if self.end_name == 'clean':
-        #     activate = False
         #
         # if self.start_name == 'tile_generation' or activate:
         #     activate = True
