@@ -5,6 +5,7 @@ from dtaidistance import dtw_visualisation as dtwvis
 import numpy as np
 from dtaidistance import clustering
 
+
 def distance_assym_matrix(s):
     w = len(s)
     mat = [[0 for x in range(w)] for y in range(w)]
@@ -17,6 +18,7 @@ def distance_assym_matrix(s):
             mat[y][x] = d
 
     return np.matrix(mat)
+
 
 def regular():
     directory = os.getcwd()
@@ -58,5 +60,51 @@ def regular():
     print("Dot saved to", graphviz_fn)
 
 
+def new():
+    np = util_numpy.np
+    directory = os.getcwd()
+
+    raw_series = [
+        [0., 0, 1, 2, 1, 0, 1, 0, 0, 5, 7, 1],
+        [0., 1, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 1, 0, 0, 5, 7, 1],
+        [1., 2, 0, 0, 0, 0, 0, 1, 1],
+        [0., 0, 1, 2, 1, 0, 1, 0, 0, 3, 1],
+        [0., 1, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [1., 2, 0, 0, 0, 0, 1, 1, 1],
+        [0., 0, 0, 0, 2, 1, 0, 1, 0, 0, 5, 7, 1],
+        [0., 0, 1, 2, 1, 0]
+    ]
+        # [
+        # [0., 0, 1, 2, 1, 0, 1, 0, 0],
+        # [0., 1, 2, 0, 0, 0, 0, 0, 0],
+        # [1., 2, 0, 0, 0, 0, 0, 1, 1],
+        # [0., 0, 1, 2, 1, 0, 1, 0, 0],
+        # [0., 1, 2, 0, 0, 0, 0, 0, 0],
+        # [1., 2, 0, 0, 0, 0, 0, 1, 1]]
+
+
+    model3 = clustering.LinkageTree(distance_assym_matrix, {})
+    cluster_idx = model3.fit(raw_series)
+
+    print(cluster_idx)
+
+    if directory:
+        hierarchy_fn = os.path.join(directory, "hierarchy.png")
+        graphviz_fn = os.path.join(directory, "hierarchy.dot")
+    else:
+        file = tempfile.NamedTemporaryFile()
+        hierarchy_fn = file.name + "_hierarchy.png"
+        graphviz_fn = file.name + "_hierarchy.dot"
+
+    # if not dtwvis.test_without_visualization():
+    #     model3.plot(hierarchy_fn)
+    #     print("Figure saved to", hierarchy_fn)
+
+    with open(graphviz_fn, "w") as ofile:
+        print(model3.to_dot(), file=ofile)
+    print("Dot saved to", graphviz_fn)
+
+
 if __name__ == '__main__':
-    regular()
+    # regular()
+    new()
