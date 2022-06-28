@@ -3,7 +3,7 @@ import logging
 from typing import Callable, Dict
 
 import pandas
-from pyarrow._dataset import Dataset
+from pandas import DataFrame
 from pyspark import RDD
 
 from context import RamuContext
@@ -21,7 +21,7 @@ class TileGeneration(Phase):
         this method need to be implemented
         :return: Callable that will be use by the map function
         """
-        def input_formatter(line: str) -> Dataset:
+        def input_formatter(line: str) -> DataFrame:
             js = json.loads(line)
             return pandas.DataFrame.from_records(js)
 
@@ -49,8 +49,8 @@ class TileGeneration(Phase):
 
         cities = self.context.get('.conf.cities')
         DICT = {}
-        for city in cities:
-            DICT[city] = get_rules(city)
+        for ct in cities:
+            DICT[ct] = get_rules(ct)
 
         def calculate_identifier(city: str, latitude, longitude):
             latitudes, longitudes = DICT[city]
@@ -82,9 +82,9 @@ class TileGeneration(Phase):
                     curr_lon = row['lon']
                     curr_lat = row['lat']
                     pre_identifier = identifier
-                    #TODO validate the name with values
+                    # TODO validate the name with values
                     identifier = calculate_identifier('berlin', curr_lat, curr_lon)
-                    if pre_identifier != None and pre_identifier != identifier:
+                    if pre_identifier is not None and pre_identifier != identifier:
                         yield identifier, pd.iloc[start:index]
                         start = index
 
