@@ -51,13 +51,21 @@ class TileGroupBy(BiPhase):
         :return: Callable that will be use as the convertor before to store
         """
         def output_formatter(tu) -> str:
-            return "{} {} {} {} {}".format(
-                tu[0],
-                type(tu[1][0]),
-                tu[1][0],
-                type(tu[1][1]),
-                len(tu[1][1])
-            )
+
+            li = []
+            for x in tu[1][1]:
+                li.append(x.to_dict('records'))
+
+            value = {
+                'key': tu[0],
+                'lat_start': tu[1][0][0],
+                'lon_start': tu[1][0][1],
+                'lat_end': tu[1][0][2],
+                'lon_end': tu[1][0][3],
+                'label': tu[1][0][4],
+                'data': li
+            }
+            return json.dumps(value)
 
         return output_formatter
 
@@ -68,7 +76,10 @@ class TileGroupBy(BiPhase):
         :param rdd_right: the rdd that will use as source for the right side of the binary operator
         :return: return the rdd after the elements converted
         """
-        return rdd_left.join(rdd_right)
+        def tuple_convert(tu):
+            return tu[0], (tu[1],tu[2],tu[3],tu[4],tu[5])
+
+        return rdd_left.map(tuple_convert).join(rdd_right)
 
 
 def tile_group_by_factory(context: RamuContext, stages: Dict[str, Phase]) -> Phase:
