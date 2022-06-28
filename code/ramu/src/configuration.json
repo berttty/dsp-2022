@@ -6,7 +6,8 @@
                 "spark.hadoop.validateOutputSpecs": "false",
                 "spark.executor.memory": "4g"
             }
-        }
+        },
+        "cities": ["berlin"]
     },
     "stages": {
         "grid_generation": {
@@ -16,21 +17,17 @@
             },
             "inputs": [
                 {
-                    "list": ["berlin"]
+                    "value": ".conf.cities",
+                    "type": "key"
                 }
             ],
             "outputs": [
                 {
-                    "path": "output_grid_generation"
+                    "value": "output_grid_generation",
+                    "type": "file"
                 }
             ],
-            "previous": [
-                {
-                    "name": "",
-                    "executed": true,
-                    "location": ""
-                }
-            ]
+            "previous": []
         },
         "grid_labeling": {
             "conf": {
@@ -38,12 +35,14 @@
             },
             "inputs": [
                 {
-                    "path": "output_grid_generation"
+                    "value": "output_grid_generation",
+                    "type": "file"
                 }
             ],
             "outputs": [
                 {
-                    "path": "output_grid_labeling"
+                    "value": "output_grid_labeling",
+                    "type": "file"
                 }
             ],
             "previous": [
@@ -58,15 +57,39 @@
             },
             "inputs": [
                 {
-                    "path": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*"
+                    "value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*",
+                    "type": "file"
                 }
             ],
             "outputs": [
                 {
-                    "path": "output_clean_timeseries"
+                    "value": "output_clean_timeseries",
+                    "type": "file"
                 }
             ],
             "previous": []
+        },
+        "tile_generation": {
+            "conf": {
+                "repartition": 12
+            },
+            "inputs": [
+                {
+                    "value": "output_clean_timeseries",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_generation",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "clean_timeseries"
+                }
+            ]
         }
     }
 }

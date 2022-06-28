@@ -48,6 +48,12 @@ class RamuContext:
         if result is None:
             logging.warning('the variable "%s" will use the default value "%s"', query, default_value)
             result = default_value
+        if type(result) is dict:
+            if 'type' in result and 'value' in result:
+                if result['type'] == 'key':
+                    return self.get(result['value']);
+                else:
+                    return result['value']
         return result
 
 

@@ -57,10 +57,10 @@ def grid_labeling_factory(context: RamuContext, stages: Dict[str, Phase]) -> Pha
     current = GridLabeling()
     current.name = 'grid_labeling'
     current.context = context
-    current.sink_path = context.get('.stages.grid_labeling.outputs[0].path')
+    current.sink_path = context.get('.stages.grid_labeling.outputs[0]')
     previous = stages[context.get('.stages.grid_labeling.previous[0].name')]
     if previous is None:
-        file_path = context.get('.stages.grid_labeling.inputs[0].path')
+        file_path = context.get('.stages.grid_labeling.inputs[0]')
         logging.info('The stage "%s" will use the file "%s" as source', current.name, file_path)
         current.source_path = file_path
     else:

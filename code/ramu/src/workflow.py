@@ -6,7 +6,7 @@ from phases.clean_timeseries import clean_timeseries_factory
 from phases.grid_generation import grid_generation_factory
 from phases.grid_labeling import grid_labeling_factory
 from phases.tile_calculations import TileUsageCalculation
-from phases.tile_generation import TileGeneration
+from phases.tile_generation import TileGeneration, tile_generation_factory
 from phases.tile_groupby import TileGroupBy
 
 
@@ -47,11 +47,12 @@ class Workflow:
         self.stages['grid_generation'] = grid_generation_factory
         self.stages['grid_labeling'] = grid_labeling_factory
         self.stages['clean_timeseries'] = clean_timeseries_factory
+        self.stages['tile_generation'] = tile_generation_factory
 
     def run(self):
         context: RamuContext = RamuContext()
         stages = {}
-        order_stages = ['grid_generation', 'grid_labeling', 'clean_timeseries']
+        order_stages = ['grid_generation', 'grid_labeling', 'clean_timeseries', 'tile_generation']
 
         for st in order_stages:
             stages[st] = self.stages[st](context, stages)

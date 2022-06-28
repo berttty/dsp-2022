@@ -145,7 +145,7 @@ def grid_generation_factory(context: RamuContext, stages: Dict[str, Phase]) -> P
     current = GridGeneration()
     current.name = 'grid_generation'
     current.context = context
-    current.sink_path = context.get('.stages.grid_generation.outputs[0].path')
-    current.source = context.get_spark().parallelize(context.get('.stages.grid_generation.inputs[0].list'))
+    current.sink_path = context.get('.stages.grid_generation.outputs[0]')
+    current.source = context.get_spark().parallelize(context.get('.stages.grid_generation.inputs[0]'))
     logging.info("End factory of GridGeneration")
     return current

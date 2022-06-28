@@ -63,8 +63,8 @@ def clean_timeseries_factory(context: RamuContext, stages: Dict[str, Phase]) -> 
     current = CleanTimeSeries()
     current.name = 'clean_timeseries'
     current.context = context
-    current.sink_path = context.get('.stages.clean_timeseries.outputs[0].path')
-    current.source_path = context.get('.stages.clean_timeseries.inputs[0].path')
+    current.sink_path = context.get('.stages.clean_timeseries.outputs[0]')
+    current.source_path = context.get('.stages.clean_timeseries.inputs[0]')
     partitions: int = int(context.get('.stages.clean_timeseries.conf.repartition'))
     current.source = context.get_spark()\
                             .wholeTextFiles(current.source_path)\
