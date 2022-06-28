@@ -28,9 +28,6 @@ class RamuContext:
         Generate the spark context
         :return:
         """
-        # TODO: pointing the context to the cluster configuration or
-        #       get the configuration using a file
-
         if self.sc is None:
             conf = pyspark.SparkConf()
             master = self.get('.conf.spark.master', 'local[*]')
