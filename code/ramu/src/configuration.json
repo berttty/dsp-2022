@@ -1,11 +1,18 @@
 {
-    "variables": {
-        "": ""
+    "conf": {
+        "spark": {
+            "master": "local[*]",
+            "others": {
+                "spark.hadoop.validateOutputSpecs": "false",
+                "spark.executor.memory": "4g"
+            }
+        }
     },
     "stages": {
         "grid_generation": {
             "conf": {
-                "repartition": 12
+                "repartition": 12,
+                "cache": false
             },
             "inputs": [
                 {
@@ -22,6 +29,26 @@
                     "name": "",
                     "executed": true,
                     "location": ""
+                }
+            ]
+        },
+        "grid_labeling": {
+            "conf": {
+                "repartition": 12
+            },
+            "inputs": [
+                {
+                    "path": "output_grid_generation"
+                }
+            ],
+            "outputs": [
+                {
+                    "path": "output_grid_labeling"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "grid_generation"
                 }
             ]
         }

@@ -1,4 +1,5 @@
 import json
+import logging
 
 import jq
 import pyspark
@@ -16,26 +17,40 @@ class RamuContext:
 
     def __init__(self, conf_file_path: str = 'configuration.json'):
         # read file
+        logging.info('the RamuContext will be created using the file "%s"', conf_file_path)
         with open(conf_file_path, 'r') as myfile:
             data = myfile.read()
 
         self.configuration_json = json.loads(data)
 
-
-    def getSparkContext(self):
+    def get_spark(self):
         """
         Generate the spark context
         :return:
         """
         # TODO: pointing the context to the cluster configuration or
         #       get the configuration using a file
+
         if self.sc is None:
-            conf = pyspark.SparkConf().setMaster('local[*]').set("spark.hadoop.validateOutputSpecs", "false").set('spark.executor.memory','4g')
+            conf = pyspark.SparkConf()
+            master = self.get('.conf.spark.master', 'local[*]')
+            logging.info('the spark will use as master: "%s"', master)
+            conf = conf.setMaster(master)
+
+            others = self.get('.conf.spark.others', {})
+            logging.info('the spark others configuration are: %s', others)
+            for key, value in others.items():
+                conf = conf.set(key, value)
+
             self.sc = pyspark.SparkContext(conf=conf)
 
         return self.sc
 
-    def get(self, query: str):
-        return jq.compile(query).input(self.configuration_json).first()
+    def get(self, query: str, default_value=None):
+        result = jq.compile(query).input(self.configuration_json).first()
+        if result is None:
+            logging.warning('the variable "%s" will use the default value "%s"', query, default_value)
+            result = default_value
+        return result
 
 

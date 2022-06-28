@@ -1,3 +1,5 @@
+import logging
+
 from pyspark import RDD
 
 from context import RamuContext
@@ -11,12 +13,13 @@ class Phase:
     """
     Phase is the structure that encapsulate one step inside of the workflow, but also allows
     """
-    context: RamuContext
-    source_path: str
-    source: RDD[In]
+    context: RamuContext = None
+    name: str = None
+    source_path: str = None
+    source: RDD[In] = None
 
-    sink_path: str
-    sink: RDD[Out]
+    sink_path: str = None
+    sink: RDD[Out] = None
 
     def inputFormatter(self) -> Callable[[str], In]:
         """
@@ -59,7 +62,8 @@ class Phase:
                 )
             )
 
-        sc = self.context.getSparkContext()
+        logging.info("The stage '%s' will use a file '%s' as source RDD", self.name, self.source_path)
+        sc = self.context.get_spark()
         return sc.textFile(self.source_path) \
                  .map(converter)
 
@@ -110,7 +114,17 @@ class Phase:
             self.sink = processed
             return
 
-        print(processed)
-        #TODO: validate if the cache is need it
-        self.sink = processed#.cache()
+        logging.info("the stage '%s' will be saved on the file '%s'", self.name, self.sink_path)
+
+        is_cached = self.context.get(
+            '.stages.{}.conf.cache'.format(self.name),
+            False
+        )
+        if is_cached:
+            logging.info("the stage '%s' RDD is cached", self.name)
+            self.sink = processed.cache()
+        else:
+            logging.info("the stage '%s' RDD is NOT cached", self.name)
+            self.sink = processed
+
         self.store(self.sink)
