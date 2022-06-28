@@ -102,3 +102,21 @@ class Workflow:
 
         if self.end_name == 'tile_generation':
             activate = False
+
+        if self.start_name == 'tile_usage_calculation' or activate:
+            activate = True
+            previous = current
+            current = TileUsageCalculation()
+            current.context = context
+            current.sink_path = 'tile_usage_calculation'
+            if previous is None:
+                current.source_path = self.source_path
+                current.source = None
+            else:
+                current.source = previous.sink
+                current.source_path = None
+
+            current.execute()
+
+        if self.end_name == 'tile_usage_calculation':
+            activate = False
