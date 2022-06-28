@@ -18,7 +18,7 @@ class GridLabeling(Phase):
         this method need to be implemented
         :return: Callable that will be use by the map function
         """
-        def convert(line) -> tuple[float, float, float, float]:
+        def convert(line) -> tuple[str, float, float, float, float]:
             position = line.split(" ")
             if len(position) != 5:
                 raise Exception("The number of elements is not valid")
@@ -34,8 +34,8 @@ class GridLabeling(Phase):
         this method need to be implemented
         :return: Callable that will be use as the convertor before to store
         """
-        def convert(tuple) -> str:
-            return "{} {} {} {} {} {}".format(tuple[0], tuple[1], tuple[2], tuple[3], tuple[4], tuple[5])
+        def convert(tu) -> str:
+            return "{} {} {} {} {} {}".format(tu[0], tu[1], tu[2], tu[3], tu[4], tu[5])
 
         return convert
 
@@ -78,7 +78,6 @@ def grid_labeling_factory(context: RamuContext, stages: Dict[str, Phase]) -> Pha
                 current.name,
                 previous.name
             )
-            print(previous.sink)
             current.source = previous.get_sink()
     logging.info('End factory of GridLabeling')
     return current

@@ -113,6 +113,39 @@
                     "name": "tile_generation"
                 }
             ]
+        },
+        "tile_group_by": {
+            "conf": {
+                "repartition": 12
+            },
+            "inputs": [
+                {
+                    "value": "output_grid_labeling",
+                    "type": "file",
+                    "index": 0
+                },
+                {
+                    "value": "output_tile_usage_calculation",
+                    "type": "file",
+                    "index": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_group_by",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "grid_labeling",
+                    "index": 0
+                },
+                {
+                    "name": "tile_usage_calculation",
+                    "index": 1
+                }
+            ]
         }
     }
 }
