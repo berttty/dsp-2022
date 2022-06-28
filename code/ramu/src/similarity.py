@@ -20,6 +20,26 @@ def distance_assym_matrix(s):
     return np.matrix(mat)
 
 
+def test_comparison():
+    raw_series = [
+        [0., 0, 1, 2, 1, 0, 1, 0, 0],
+        [0., 1, 2, 0, 0, 0, 0, 0, 0],
+        [1., 2, 0, 0, 0, 0, 0, 1, 1],
+        [0., 0, 1, 2, 1, 0, 1, 0, 0],
+        [0., 1, 2, 0, 0, 0, 0, 0, 0],
+        [1., 2, 0, 0, 0, 0, 0, 1, 1]]
+
+    series = np.matrix(raw_series)
+
+    ds = dtw.distance_matrix_fast(series)
+    test = distance_assym_matrix(raw_series)
+
+    print(ds)
+    print(test)
+
+    print((ds == test).all())
+
+
 def regular():
     directory = os.getcwd()
 
