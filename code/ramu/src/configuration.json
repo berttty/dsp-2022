@@ -4,15 +4,19 @@
             "master": "local[*]",
             "others": {
                 "spark.hadoop.validateOutputSpecs": "false",
-                "spark.executor.memory": "4g"
-            }
+                "spark.executor.memory": "5g"
+            },
+            "repartition": 120
         },
         "cities": ["berlin"]
     },
     "stages": {
         "grid_generation": {
             "conf": {
-                "repartition": 12,
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                },
                 "cache": false
             },
             "inputs": [
@@ -31,7 +35,10 @@
         },
         "grid_labeling": {
             "conf": {
-                "repartition": 12
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
             },
             "inputs": [
                 {
@@ -53,11 +60,15 @@
         },
         "clean_timeseries": {
             "conf": {
-                "repartition": 12
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
             },
             "inputs": [
                 {
-                    "value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*",
+                    "value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*",
+                    "test_value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*",
                     "type": "file"
                 }
             ],
@@ -71,7 +82,10 @@
         },
         "tile_generation": {
             "conf": {
-                "repartition": 12
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
             },
             "inputs": [
                 {
@@ -93,7 +107,10 @@
         },
         "tile_usage_calculation": {
             "conf": {
-                "repartition": 12,
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                },
                 "reduction": 0.10
             },
             "inputs": [
@@ -116,7 +133,10 @@
         },
         "tile_group_by": {
             "conf": {
-                "repartition": 12
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
             },
             "inputs": [
                 {
