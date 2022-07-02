@@ -1,9 +1,12 @@
 import json
-from typing import Callable
+import logging
+from typing import Callable, Dict
 
 import pandas
-from pyarrow._dataset import Dataset
+from pandas import DataFrame
 from pyspark import RDD
+
+from context import RamuContext
 from phase import Phase, In, Out
 from phases.grid_generation import get_identifier, get_rules
 
@@ -18,7 +21,7 @@ class TileGeneration(Phase):
         this method need to be implemented
         :return: Callable that will be use by the map function
         """
-        def input_formatter(line: str) -> Dataset:
+        def input_formatter(line: str) -> DataFrame:
             js = json.loads(line)
             return pandas.DataFrame.from_records(js)
 
@@ -43,9 +46,11 @@ class TileGeneration(Phase):
         :param rdd: the rdd that will use as source
         :return: return the rdd after the elements converted
         """
-# TODO validate how to get parametrical
+
+        cities = self.context.get('.conf.cities')
         DICT = {}
-        DICT['berlin'] = get_rules('berlin')
+        for ct in cities:
+            DICT[ct] = get_rules(ct)
 
         def calculate_identifier(city: str, latitude, longitude):
             latitudes, longitudes = DICT[city]
@@ -77,12 +82,43 @@ class TileGeneration(Phase):
                     curr_lon = row['lon']
                     curr_lat = row['lat']
                     pre_identifier = identifier
-                    #TODO validate the name with values
+                    # TODO validate the name with values
                     identifier = calculate_identifier('berlin', curr_lat, curr_lon)
-                    if pre_identifier != None and pre_identifier != identifier:
+                    if pre_identifier is not None and pre_identifier != identifier:
                         yield identifier, pd.iloc[start:index]
                         start = index
 
             yield identifier, pd.iloc[start:]
 
         return rdd.flatMap(func)
+
+
+def tile_generation_factory(context: RamuContext, stages: Dict[str, Phase]) -> Phase:
+    logging.info('Start factory of TileGeneration')
+    current = TileGeneration()
+    current.name = 'tile_generation'
+    current.context = context
+    current.sink_path = context.get('.stages.tile_generation.outputs[0]')
+    previous = stages[context.get('.stages.tile_generation.previous[0].name')]
+    if previous is None:
+        file_path = context.get('.stages.tile_generation.inputs[0]')
+        logging.info('The stage "%s" will use the file "%s" as source', current.name, file_path)
+        current.source_path = file_path
+    else:
+        if previous.get_sink() is None:
+            logging.info(
+                'The stage "%s" will use the file "%s" as source coming from the stage "%s"',
+                current.name,
+                previous.sink_path,
+                previous.name
+            )
+            current.source_path = previous.sink_path
+        else:
+            logging.info(
+                'The stage "%s" will use the output from the stage "%s" directly',
+                current.name,
+                previous.name
+            )
+            current.source = previous.get_sink()
+    logging.info('End factory of TileGeneration')
+    return current

@@ -1,28 +1,31 @@
 import logging
+from typing import Callable
 
 from pyspark import RDD
 
-from context import RamuContext
-from typing import (Callable, TypeVar)
-
-In = TypeVar("In")
-In2 = TypeVar("In2")
-Out = TypeVar("Out")
+from phase import Phase, In, In2, Out
 
 
-class Phase:
+class BiPhase(Phase):
     """
     Phase is the structure that encapsulate one step inside of the workflow, but also allows
     """
-    context: RamuContext = None
-    name: str = None
-    source_path: str = None
-    source: RDD[In] = None
+    source_path_left: str = None
+    source_left: RDD[In] = None
+    source_path_right: str = None
+    source_right: RDD[In2] = None
 
-    sink_path: str = None
-    sink: RDD[Out] = None
+    def inputFormatterLeft(self) -> Callable[[str], In]:
+        """
+        inputFormatter provide a method to convert the text to the type that could be process
+        by the Phase
 
-    def inputFormatter(self) -> Callable[[str], In]:
+        this method need to be implemented
+        :return: Callable that will be use by the map function
+        """
+        return None
+
+    def inputFormatterRight(self) -> Callable[[str], In2]:
         """
         inputFormatter provide a method to convert the text to the type that could be process
         by the Phase
@@ -41,21 +44,21 @@ class Phase:
         """
         return None
 
-    def getRDDSource(self) -> RDD[In]:
+    def getRDDSourceLeft(self) -> RDD[In]:
         """
         get or create the source for the Phase
 
         :return: RDD instance that is use as source
         """
-        if self.source is not None:
-            return self.source
+        if self.source_left is not None:
+            return self.source_left
 
-        if self.source_path is None:
+        if self.source_path_left is None:
             raise Exception("the source_path could not be None")
 
         # TODO validate the source_path have the correct format
 
-        converter = self.inputFormatter()
+        converter = self.inputFormatterLeft()
         if converter is None:
             raise Exception(
                 "the inputFormatter is not defined correctly, please check the implementation of {}".format(
@@ -63,19 +66,39 @@ class Phase:
                 )
             )
 
-        logging.info("The stage '%s' will use a file '%s' as source RDD", self.name, self.source_path)
+        logging.info("The stage '%s' will use a file '%s' as source RDD", self.name, self.source_path_left)
         sc = self.context.get_spark()
-        return sc.textFile(self.source_path) \
-                 .map(converter)
+        return sc.textFile(self.source_path_left) \
+            .map(converter)
 
-    def run(self, rdd: RDD[In]) -> RDD[Out]:
+    def getRDDSourceRight(self) -> RDD[In]:
         """
-        run is the method that contains the logic of the phase
-        :param rdd: the rdd that will use as source
-        :return: return the rdd after the elements converted
-        """
+        get or create the source for the Phase
 
-    def run_binary(self, rdd_left: RDD[In], rdd_right: RDD[In2]) -> RDD[Out]:
+        :return: RDD instance that is use as source
+        """
+        if self.source_right is not None:
+            return self.source_right
+
+        if self.source_path_right is None:
+            raise Exception("the source_path could not be None")
+
+        # TODO validate the source_path have the correct format
+
+        converter = self.inputFormatterRight()
+        if converter is None:
+            raise Exception(
+                "the inputFormatter is not defined correctly, please check the implementation of {}".format(
+                    type(self).__name__
+                )
+            )
+
+        logging.info("The stage '%s' will use a file '%s' as source RDD", self.name, self.source_path_right)
+        sc = self.context.get_spark()
+        return sc.textFile(self.source_path_right) \
+            .map(converter)
+
+    def run(self, rdd_left: RDD[In], rdd_right: RDD[In2]) -> RDD[Out]:
         """
         run is the method that contains the logic of the phase
         :param rdd_left: the rdd that will use as source for the left side of the binary operator
@@ -83,43 +106,16 @@ class Phase:
         :return: return the rdd after the elements converted
         """
 
-    def store(self, rdd: RDD[Out]):
-        """
-        store create a file and save the information using the methods
-        :param rdd: it take the
-        :return:
-        """
-        if self.sink_path is None:
-            raise Exception("the sink_path could not be None")
-
-        # TODO validate the source_path have the correct format
-
-        converter = self.outputFormatter()
-        if converter is None:
-            raise Exception(
-                "the outputFormatter is not defined correctly, please check the implementation of {}".format(
-                    type(self).__name__
-                )
-            )
-
-        rdd.map(converter)\
-           .saveAsTextFile(self.sink_path)
-
-    def get_sink(self) -> RDD[Out]:
-        """
-        obtain the sink of the phase this could be use by other phase
-        :return: return the sink of the current phase
-        """
-        return self.sink
-
     def execute(self):
         """
         execute the pipeline of the current phase
         :return:
         """
         logging.info("the stage '%s' is Executing", self.name)
-        rdd = self.getRDDSource()
-        processed: RDD[Out] = self.run(rdd)
+        rdd_left = self.getRDDSourceLeft()
+        rdd_right = self.getRDDSourceRight()
+        processed: RDD[Out] = self.run(rdd_left, rdd_right)
+
         if self.sink_path is None:
             self.sink = processed
             return

@@ -1,0 +1,171 @@
+{
+    "conf": {
+        "spark": {
+            "master": "local[*]",
+            "others": {
+                "spark.hadoop.validateOutputSpecs": "false",
+                "spark.executor.memory": "5g"
+            },
+            "repartition": 120
+        },
+        "cities": ["berlin"]
+    },
+    "stages": {
+        "grid_generation": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                },
+                "cache": false
+            },
+            "inputs": [
+                {
+                    "value": ".conf.cities",
+                    "type": "key"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_grid_generation",
+                    "type": "file"
+                }
+            ],
+            "previous": []
+        },
+        "grid_labeling": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
+            },
+            "inputs": [
+                {
+                    "value": "output_grid_generation",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_grid_labeling",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "grid_generation"
+                }
+            ]
+        },
+        "clean_timeseries": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
+            },
+            "inputs": [
+                {
+                    "value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/2019/**/*",
+                    "test_value": "file:///Users/bertty/dataset_dsp/Berlin/Rides/test/*",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_clean_timeseries",
+                    "type": "file"
+                }
+            ],
+            "previous": []
+        },
+        "tile_generation": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
+            },
+            "inputs": [
+                {
+                    "value": "output_clean_timeseries",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_generation",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "clean_timeseries"
+                }
+            ]
+        },
+        "tile_usage_calculation": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                },
+                "reduction": 0.10
+            },
+            "inputs": [
+                {
+                    "value": "output_tile_generation",
+                    "type": "file"
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_usage_calculation",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "tile_generation"
+                }
+            ]
+        },
+        "tile_group_by": {
+            "conf": {
+                "repartition": {
+                    "value": ".conf.spark.repartition",
+                    "type" : "key"
+                }
+            },
+            "inputs": [
+                {
+                    "value": "output_grid_labeling",
+                    "type": "file",
+                    "index": 0
+                },
+                {
+                    "value": "output_tile_usage_calculation",
+                    "type": "file",
+                    "index": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "output_tile_group_by",
+                    "type": "file"
+                }
+            ],
+            "previous": [
+                {
+                    "name": "grid_labeling",
+                    "index": 0
+                },
+                {
+                    "name": "tile_usage_calculation",
+                    "index": 1
+                }
+            ]
+        }
+    }
+}

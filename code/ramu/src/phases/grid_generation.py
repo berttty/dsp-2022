@@ -1,8 +1,10 @@
+import logging
 import math
-from typing import Callable
+from typing import Callable, Dict
 
 from pyspark import RDD
 
+from context import RamuContext
 from phase import Phase, In, Out
 
 import geopy.distance
@@ -11,35 +13,45 @@ from variable import CITY
 
 OPT_DIRECTION = {'north': 0, 'south': 180, 'east': 90, 'west': -90}
 
+
+def calculate_number_tiles(latitude_start, longitude_start, latitude_end, longitude_end, size) -> int:
+    return 1 + math.ceil(
+        geopy.distance.geodesic(
+            (latitude_start, longitude_start),
+            (latitude_end, longitude_end)
+        ).meters / size
+    )
+
+
 def generate_ruler_longitude(longitude, latitude_start, latitude_end, size: int = 100):
-    tiles: int = math.ceil(geopy.distance.geodesic((latitude_start, longitude), (latitude_end, longitude)).meters / size) + 1
+    tiles: int = calculate_number_tiles(latitude_start, longitude, latitude_end, longitude, size)
     latitudes = [None] * tiles
     index = 0
     latitude = latitude_start
     latitudes[index] = latitude
     while latitude > latitude_end:
-        latitude, _ = nextpoint(latitude, longitude, 'south', size)
+        latitude, _ = next_point(latitude, longitude, 'south', size)
         index = index + 1
         latitudes[index] = latitude
 
     return latitudes
 
+
 def generate_ruler_latitude(latitude, longitude_start, longitude_end, size: int = 100):
-    tiles: int = math.ceil(geopy.distance.geodesic((latitude, longitude_start), (latitude, longitude_end)).meters / size) + 1
+    tiles: int = calculate_number_tiles(latitude, longitude_start, latitude, longitude_end, size)
     longitudes = [None] * tiles
     index = 0
     longitude = longitude_start
     longitudes[index] = longitude
     while longitude < longitude_end:
-        _ , longitude = nextpoint(latitude, longitude, 'east', size)
+        _, longitude = next_point(latitude, longitude, 'east', size)
         index = index + 1
         longitudes[index] = longitude
 
     return longitudes
 
 
-
-def nextpoint(latitude, longitude, direction: str, size: int = 100):
+def next_point(latitude, longitude, direction: str, size: int = 100):
     """
     Calculate the next point from the point(latitude, longitude) in distance of 'size' in the direction
     'north', 'south', 'east', 'west'
@@ -120,7 +132,20 @@ class GridGeneration(Phase):
         :param rdd: the rdd that will use as source
         :return: return the rdd after the elements converted
         """
-        return rdd.flatMap(lambda city: grid(city)).repartition(12)
+
+        return rdd\
+            .flatMap(lambda city: grid(city))\
+            .repartition(
+                self.context.get('.stages.grid_generation.conf.repartition')
+            )
 
 
-
+def grid_generation_factory(context: RamuContext, stages: Dict[str, Phase]) -> Phase:
+    logging.info("Start factory of GridGeneration")
+    current = GridGeneration()
+    current.name = 'grid_generation'
+    current.context = context
+    current.sink_path = context.get('.stages.grid_generation.outputs[0]')
+    current.source = context.get_spark().parallelize(context.get('.stages.grid_generation.inputs[0]'))
+    logging.info("End factory of GridGeneration")
+    return current

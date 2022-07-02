@@ -96,5 +96,5 @@ wheel=0.37.1=pyhd3eb1b0_0
 xz=5.2.5=hca72f7f_1
 zlib=1.2.12=h6c3fc93_0
 zstd=1.5.2=h582d3a0_0
-overpy=0.6
-setuptools=61.2.0
+shapely=1.8.2
+osmium=3.3.0
